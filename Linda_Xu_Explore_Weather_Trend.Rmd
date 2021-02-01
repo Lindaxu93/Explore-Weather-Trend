@@ -1,0 +1,83 @@
+---
+title: "Explore Weather Trend"
+author: "Linda Xu"
+date: "12.22.2020"
+output:
+  word_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+**Outline**
+In this project, I will analyze local and global temperature data and compare the temperature trends where I live to overall global temperature trends. I choose local area Anshan, China. And I'll be using SQL, EXCEL and R.
+
+**Step 1: Extraction of data from database using SQL**
+
+select * from global_data;
+
+select * from city_data where country='China' and city='Anshan;
+
+
+I download files as "results(1).csv" and "results(2).csv".
+
+And I manipulate two files into one, name "New update.csv"
+
+Moving Average:
+
+Moving averages are used to smooth out data to make it easier to observe long term trends and not get lost in daily fluctuations. I create two columns called global mov_avg and local mov_avg, which are where the moving average field will be stored. I use commend =AVERAGE(B2:B11) for global mov_avg and commend=AVERAGE(E81:E90) for local mov_avg  to see the moving average value for 10 years. Note that global temperature was recorded since 1750 while local temperature was recorded since 1829.
+
+
+```{r}
+# Use ggplot2 for visualization
+library(ggplot2)
+library(tidyverse)
+```
+
+**Step 2: Read data and Visualization：**
+```{r}
+temp <- read.csv(file = 'C:/Users/xuwen/Desktop/Udecity/Project 1/New update.csv')
+head(temp)
+```
+```{r}
+#start year 1829 for both local and global temperature 
+temp2<- read.csv(file = 'C:/Users/xuwen/Desktop/Udecity/Project 1/New update 2.csv')
+head(temp2)
+```
+
+**Anshan Moving Average Temperature**
+```{r}
+temp %>%
+  select(year.2, local.mov_avg)%>%
+  group_by(year.2)%>%
+  ggplot(aes(y= local.mov_avg, x= year.2))+ geom_line()+geom_smooth()+ ggtitle("Anshan Moving Average Temperature Over Years")+labs(y="Anshan temperature(°C)", x = "Year")
+```
+
+**Global Moving Average Temperature**
+```{r}
+temp %>%
+  select(year.1, global.mov_avg)%>%
+  group_by(year.1)%>%
+  ggplot(aes(y= global.mov_avg, x= year.1))+ geom_line()+geom_smooth()+ ggtitle("Global Moving Average Temperature Over Years")+labs(y="Global temperature(°C)", x = "Year")
+```
+
+**Anshan and Global Moving Average Temperature**
+
+```{r}
+ggplot(temp2, aes(year.1)) +
+  geom_line(aes(y = local.mov_avg, color = "blue")) + 
+  geom_line(aes(y = global.mov_avg, color= "yellow"))+
+ggtitle("Line Chart of Global vs. Anshan Temperature (Moving Average) ")+labs(y="Moving Average Temperature(°C)", x = "Year")+scale_color_discrete(name = "location", labels = c("Anshan", "Global"))
+```
+```{r}
+summary(temp2)
+```
+
+
+
+**Step 3:Observation**
+1. The temperature is rising over the years due to climate change. 
+2. The temperature is more than 2 degree higher between 1800 to 2100 on global basis.
+3. The temperature in Anshan, China is lower than the global scale, but its temperature has increased a lot as well. Both of them are rising.
+4. In early 1900, in terms of the Anshan moving average temperature, it was decreased for estimate 20 years, then it went up.  
+5. The lowest global moving average temperature is 7.67, and highest is 9.594; while the lowest Anshan moving average temperature is 6.314, and highest is 8.536. And the mean global moving average temperature is 8.461, while the mean local moving average temperature is 7.20. 
+
